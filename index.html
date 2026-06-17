@@ -139,9 +139,10 @@
 <div class="app-shell">
 
   <div class="hero">
-    <div class="eyebrow mono">REGULATION EXAM — 第12版 (2026.03)</div>
+    <div class="eyebrow mono">version 1.0</div>
     <h1>ベイブレード<span>X</span> 検定 <small style="font-size:20px;">[100問]</small></h1>
-    <p>単一選択、複数選択、引っかけ問題が入り乱れる実践的テスト。論理的なルール解釈と正確な知識が求められます。</p>
+    <p>当問題はレギュレーション第12版を元に生成されています。</p>
+    <p></p>
     <div class="start-btn">
       <button class="blade-btn" id="startBtn">検定をはじめる ▸</button>
     </div>
@@ -453,7 +454,7 @@ function renderQuestion(){
   const subBtn = document.getElementById('submitBtn');
   if(q.isMulti){
     subBtn.classList.remove('hidden');
-    subBtn.disabled = true;
+    subBtn.disabled = false;
   } else {
     subBtn.classList.add('hidden');
   }
