@@ -156,7 +156,7 @@
 <div class="app-shell">
 
   <div class="hero">
-    <div class="eyebrow mono">version 2.1</div>
+    <div class="eyebrow mono">version 2.2</div>
     <h1>ベイブレード<span>X</span> 検定 <small style="font-size:20px;">[100問]</small></h1>
     <p>当問題はレギュレーション第12版を元に生成されています。</p>
     <p></p>
@@ -185,7 +185,8 @@
       </div>
 
       <div class="next-wrap">
-        <button class="blade-btn ghost hidden" id="nextBtn">次の問題へ ▸</button>
+        <a href="https://beyblade.takaratomy.co.jp/beyblade-x/_image/regulation.pdf" target="_blank" class="blade-btn ghost hidden" id="regBtn" style="margin-right:auto; text-decoration:none;">レギュレーション確認</a>
+        <button class="blade-btn ghost hidden" id="nextBtn">次の問題へ</button>
       </div>
     </div>
   </div>
@@ -522,6 +523,7 @@ function renderQuestion(){
   document.getElementById('explainBox').textContent = '';
   document.getElementById('badgeSlot').innerHTML = '';
   document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('regBtn').classList.add('hidden');
 }
 
 function handleSelect(pos, btnEl){
@@ -604,7 +606,14 @@ function evaluateAnswer(){
   document.getElementById('feedbackRow').style.display = 'flex';
   const nextBtn = document.getElementById('nextBtn');
   nextBtn.classList.remove('hidden');
-  nextBtn.textContent = (current === order.length-1) ? '結果を見る ▸' : '次の問題へ ▸';
+  nextBtn.textContent = (current === order.length-1) ? '結果を見る' : '次の問題へ';
+
+  const regBtn = document.getElementById('regBtn');
+  if (isCorrect) {
+    regBtn.classList.add('hidden');
+  } else {
+    regBtn.classList.remove('hidden');
+  }
 }
 
 document.getElementById('nextBtn').addEventListener('click', () => {
