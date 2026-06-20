@@ -18,6 +18,7 @@
     --slate:#7587A0;
     --alert:#FF4D5E;
     --gold:#FFC93C;
+    --pink:#E054E0;
   }
 
   *{box-sizing:border-box;}
@@ -67,6 +68,26 @@
   .blade-btn.ghost{ background:transparent; color:var(--chrome); border:1px solid #2A3850; }
   .blade-btn.ghost:hover{ border-color:var(--cyan); color:var(--cyan); }
   .blade-btn.action{ background:var(--cyan); color:#0A0E16; width:100%; margin-top:16px; }
+
+  /* ---------- SETTINGS (count / genre selectors) ---------- */
+  .setting-block{ position:relative; z-index:1; margin-top:18px; }
+  .setting-label{ font-size:11px; letter-spacing:.1em; color:var(--slate); text-transform:uppercase; margin-bottom:8px; }
+  .toggle-group{ display:flex; flex-wrap:wrap; gap:8px; }
+  .toggle-btn{
+    background:var(--panel-2); border:1px solid #2A3850; color:var(--slate);
+    font-family:'Noto Sans JP', sans-serif; font-weight:500; font-size:13px;
+    padding:9px 14px; border-radius:3px; cursor:pointer; transition:all .15s ease;
+  }
+  .toggle-btn:hover{ border-color:var(--cyan); color:var(--chrome); }
+  .toggle-btn.active{ background:#102733; border-color:var(--cyan); color:var(--cyan); }
+  .toggle-btn.genre-btn.active{ background:#4A2E14; border-color:var(--orange); color:var(--orange); }
+  .toggle-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  #genreGroup{ display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; }
+  #genreGroup .toggle-btn{ width:100%; text-align:center; }
+  #genreGroup .toggle-btn[data-genre="spin"].active   { background:#102733; border-color:var(--cyan);  color:var(--cyan); }
+  #genreGroup .toggle-btn[data-genre="over"].active    { background:#2A1A0A; border-color:var(--orange); color:var(--orange); }
+  #genreGroup .toggle-btn[data-genre="burst"].active   { background:#2A230A; border-color:var(--gold);  color:var(--gold); }
+  #genreGroup .toggle-btn[data-genre="extreme"].active { background:#2A0A28; border-color:var(--pink);  color:var(--pink); }
 
   /* ---------- PROGRESS ---------- */
   .progress-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -136,9 +157,9 @@
   }
   /* カラーバリエーション（カテゴリ別） */
   .badge-spin   { background:#142530; border:1px solid #22384A; color:var(--cyan); }
-  .badge-over   { background:#0E2030; border:1px solid #1C4255; color:var(--cyan); }
-  .badge-burst  { background:#2A1A0A; border:1px solid #4A2E14; color:var(--orange); }
-  .badge-extreme{ background:#2A230A; border:1px solid #4A3A0E; color:var(--gold); }
+  .badge-over   { background:#2A1A0A; border:1px solid #4A2E14; color:var(--orange); }
+  .badge-burst  { background:#2A230A; border:1px solid #4A3A0E; color:var(--gold); }
+  .badge-extreme{ background:#2A0A28; border:1px solid #4A1448; color:var(--pink); }
   .badge-miss   { background:#200D10; border:1px solid #3A1A1F; color:var(--alert); }
 
   .next-wrap{display:flex; justify-content:flex-end; margin-top:22px;}
@@ -149,6 +170,17 @@
   .result-score span{color:var(--slate); font-size:24px;}
   .result-rank{ font-family:'Rajdhani', sans-serif; font-weight:700; font-style:italic; font-size:26px; margin:14px 0 6px; transform:skewX(-3deg); }
   .ring-wrap{margin:18px auto 8px; width:140px; height:140px;}
+
+  /* ---------- CATEGORY ACCURACY GAUGES ---------- */
+  .category-gauges{ margin:26px 0 6px; text-align:left; }
+  .category-gauges-title{ font-size:11px; letter-spacing:.1em; color:var(--slate); text-transform:uppercase; margin-bottom:14px; text-align:center; }
+  .gauge-row{ margin-bottom:14px; }
+  .gauge-row:last-child{ margin-bottom:0; }
+  .gauge-label{ display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; color:var(--chrome); margin-bottom:6px; }
+  .gauge-label .gauge-pct{ font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--slate); }
+  .gauge-track{ height:8px; background:#1B2433; border:1px solid #222C3D; border-radius:4px; overflow:hidden; }
+  .gauge-fill{ height:100%; width:0%; border-radius:4px; transition:width 1s ease; }
+
   .hidden{display:none !important;}
 </style>
 </head>
@@ -156,12 +188,32 @@
 <div class="app-shell">
 
   <div class="hero">
-    <div class="eyebrow mono">version 2.4</div>
-    <h1>ベイブレード<span>X</span> 検定 <small style="font-size:20px;">[100問]</small></h1>
+    <div class="eyebrow mono">version 3.0</div>
+    <h1>ベイブレード<span>X</span> 検定</h1>
     <p>当問題はレギュレーション第12版を元に生成されています。</p>
     <p></p>
+
+    <div class="setting-block">
+      <div class="setting-label mono">問題数</div>
+      <div class="toggle-group" id="countGroup">
+        <button type="button" class="toggle-btn" data-count="10">10問</button>
+        <button type="button" class="toggle-btn" data-count="50">50問</button>
+        <button type="button" class="toggle-btn active" data-count="100">100問</button>
+      </div>
+    </div>
+
+    <div class="setting-block">
+      <div class="setting-label mono">出題ジャンル（複数選択可）</div>
+      <div class="toggle-group" id="genreGroup">
+        <button type="button" class="toggle-btn genre-btn active" data-genre="spin">基礎知識</button>
+        <button type="button" class="toggle-btn genre-btn active" data-genre="over">禁止・ペナルティ知識</button>
+        <button type="button" class="toggle-btn genre-btn active" data-genre="burst">バトル知識</button>
+        <button type="button" class="toggle-btn genre-btn active" data-genre="extreme">応用問題</button>
+      </div>
+    </div>
+
     <div class="start-btn">
-      <button class="blade-btn" id="startBtn">検定をはじめる ▸</button>
+      <button class="blade-btn" id="startBtn" style="margin-top:18px;">検定をはじめる ▸</button>
     </div>
   </div>
 
@@ -185,7 +237,7 @@
       </div>
 
       <div class="next-wrap">
-        <a href="https://beyblade.takaratomy.co.jp/beyblade-x/_image/regulation.pdf" target="_blank" class="blade-btn ghost hidden" id="regBtn" style="margin-right:auto; text-decoration:none;">レギュレーション確認</a>
+        <a href="regulation.pdf" target="_blank" class="blade-btn ghost hidden" id="regBtn" style="margin-right:auto; text-decoration:none;">レギュレーション</a>
         <button class="blade-btn ghost hidden" id="nextBtn">次の問題へ</button>
       </div>
     </div>
@@ -204,6 +256,12 @@
       </div>
       <div class="result-rank" id="resultRank"></div>
       <p class="result-flavor" id="resultFlavor"></p>
+
+      <div class="category-gauges" id="categoryGauges">
+        <div class="category-gauges-title mono">ジャンル別 正答率</div>
+        <div id="categoryGaugeRows"></div>
+      </div>
+
       <button class="blade-btn" id="retryBtn">もう一度挑戦する ▸</button>
       <button class="blade-btn ghost" id="retryWrongBtn" style="width:100%; margin-top:10px; display:none;">間違った問題に再挑戦 ▸</button>
     </div>
@@ -215,9 +273,9 @@
 const RAW_QUESTIONS = [
   // --- 複数選択・引っかけ特化 ---
   { q: "3on3のルール上、起きてはならない事象を下記から全て選べ。", o: ["同じベイを2回連続で使った。", "4thバトルに移行するとき、ベイの順番を入れ替えた。", "一方の選手がシュートミスを2回したので相手に1ポイント与え、次のベイに進んだ。", "4thバトルに移行するとき、ベイの組み合わせを変更した。"], c: [2, 3], t: "extreme", e: "4thバトル移行時にベイの順番の入替が可能なため、3rd,4thで同じベイを使う場合があります。同じパーツ(ワルキューレ,エンペラーを含む)の複数使用不可。ペナルティ時は「やり直し」であり次のベイには進みません。" },
-  { q: "3on3バトルにおけるデッキ構成について、起きてはならない事象を全て選べ。", o: ["色違いの同名ブレードを2つ入れた", "モード違いの「Ｄ/デュアル」を2つ入れた", "イラスト違いのロックチップ「ドラン」を2つ入れた", "ロックチップ「ワルキューレ」「エンペラー」を１つずつ入れた"], c: [0, 1], t: "extreme", e: "色違いも同パーツ扱いで複数使用不可です！また、ワルキューレとエンペラーは特例でそれぞれ1個ずつしかデッキに入れられません！" },
-  { q: "スタジアムは原則地面において使いますが、下記の中から正しい使用方法を全て選べ。", o: ["座った姿勢でシュートをしてはならない。", "膝立ち姿勢でシュートをしなくてはならない。", "シュート時の姿勢は選手の自由である。", "公式スタジアム什器と同じ寸法なら、自作のスタジアム台を使用してもよい。"], c: [0,1], t: "extreme", e: "シュート時の姿勢は膝立ち姿勢です。自作のスタジアム台は使用できません。" },
-  { q: "「エクストリームフィニッシュ」と「バーストフィニッシュ」が同時に起きた場合、エクストリームの方が獲得ポイントが高いため、エクストリームフィニッシュが成立となる。", o: ["正しい", "誤り"], c: 1, t: "burst", e: "誤り。同時に複数の決まり手が「発生」した場合は、ポイントの大小に関わらず「引き分け」となり再バトルとなります。" },
+  { q: "3on3バトルのデッキ構成について、起きてはならない事象を全て選べ。", o: ["色違いの同名ブレードを2つ入れた", "モード違いの「Ｄ/デュアル」を2つ入れた", "イラスト違いのロックチップ「ドラン」を2つ入れた", "ロックチップ「ワルキューレ」「エンペラー」を１つずつ入れた"], c: [0, 1], t: "extreme", e: "色違いも同パーツ扱いで複数使用不可です！また、ワルキューレとエンペラーは特例でそれぞれ1個ずつしかデッキに入れられません！" },
+  { q: "スタジアムは原則地面において使うが、下記の中から正しい使用方法を全て選べ。", o: ["座った姿勢でシュートをしてはならない。", "膝立ち姿勢でシュートをしなくてはならない。", "シュート時の姿勢は選手の自由である。", "公式スタジアム什器と同じ寸法なら、自作のスタジアム台を使用してもよい。"], c: [0,1], t: "extreme", e: "シュート時の姿勢は膝立ち姿勢です。自作のスタジアム台は使用できません。" },
+  { q: "「エクストリームフィニッシュ」と「バーストフィニッシュ」が同時に起きた場合、エクストリームの方が獲得ポイントが高いため、エクストリームフィニッシュが成立となる。", o: ["正しい", "誤り"], c: 1, t: "extreme", e: "誤り。同時に複数の決まり手が「発生」した場合は、ポイントの大小に関わらず「引き分け」となり再バトルとなります。" },
   { q: "殿堂入りパーツは「ベイを1つのみ使用する試合」では使用できないが、対戦相手の許可があれば特例として使用できる。", o: ["正しい", "誤り"], c: 1, t: "extreme", e: "誤り。相手の許可があっても使用できません。3on3やチーム戦などベイを複数使用する試合のみ可能です。" },
   { q: "3on3バトルで引き分けのバトルが発生した場合の正しい対応を選べ。", o: ["両者に1ポイントが入り、次のベイに進む。", "両者にポイントは入らず、次のベイに進む。", "両者に1ポイントが入り、同じベイで再バトル。", "両者にポイントは入らず、同じベイで再バトル。"], c: 3, t: "burst", e: "誤り。引き分けの場合は同じ番号のベイで再バトルとなります。" },
   { q: "「失格」もしくは「負け」になる可能性がある行為を全て選べ。", o: ["ジャッジの許可なくシュートフォームを変更した", "故意に相手の選手やスタジアムに接触した", "故意にシュートパワーを調整した", "ジャッジが勝敗宣告する前にスタジアム内のベイに触れた"], c: [1, 3], t: "extreme", e: "故意に相手に触れる行為や、勝敗宣告前にベイに触れる行為は失格となる可能性があります。" },
@@ -247,7 +305,7 @@ const RAW_QUESTIONS = [
   { q: "2023年6月以前に発売されたランチャーやスタジアムについて正しいものを選べ。", o: ["スタジアムのみ使用可", "ランチャーのみ使用可", "使用できない", "ジャッジの許可があれば使用可"], c: 2, t: "spin", e: "それ以前のベイ、ランチャー、スタジアム、装飾品の使用はできません。" },
   { q: "ベイチェックやバトルの勝敗等の最終判断を行うのは誰か。", o: ["選手同士", "大会、イベントの主催者", "ジャッジ", "最新レギュレーション"], c: 2, t: "spin", e: "すべての判断はジャッジに従ってください。" },
   { q: "「殿堂入りパーツ」の使用ルールとして正しいものを全て選べ。", o: ["ベイを1つのみ使用する試合では使用できない。", "対戦相手の許可があれば1ベイバトルでも使用可能。", "3on3バトルでは使用可能。", "チーム戦では使用可能。"], c: [0, 2, 3], t: "extreme", e: "殿堂入りパーツは複数のベイを使用する試合（3on3やチーム戦）でのみ使用可能です！例外はありません！" },
-  { q: "ベイチェック時に、ジャッジが対戦者のベイから外して確認するパーツを全て選べ。", o: ["オーバーブレード", "メタルブレード", "アシストブレード", "カスタムグリップ"], c: [0, 1, 2], t: "spin", e: "第12版の改定により、ブレード、ロックチップ、メインブレード、ラチェット、ビットに加え、「オーバーブレード」「メタルブレード」「アシストブレード」が明記されました！ランチャーはベイチェックではなくランチャーチェックの対象です！" },
+  { q: "ベイチェック時に、ジャッジがベイから外して確認するパーツを全て選べ。", o: ["オーバーブレード", "メタルブレード", "アシストブレード", "カスタムグリップ"], c: [0, 1, 2], t: "spin", e: "第12版の改定により、ブレード、ロックチップ、メインブレード、ラチェット、ビットに加え、「オーバーブレード」「メタルブレード」「アシストブレード」が明記されました！ランチャーはベイチェックではなくランチャーチェックの対象です！" },
   { q: "加工、分解について、正しいものを全て選べ。", o: ["純正パーツであれば加工、分解してもよい", "修理目的であれば分解、修理して使用してもよい", "性能に変化がなければ分解してもよい", "ジャッジおよび相手の許可を得た場合に限り、加工、分解したパーツを使用してもよい"], c: [], t: "extreme", e: "純正パーツの分解・加工は一切禁止されています。" }, 
   { q: "パーツへの塗装が禁止される条件を全て選べ。", o: ["ジャッジが不適切と判断した塗装", "各パーツの接触部分への塗装", "スタジアム、相手のベイとの接触部分への塗装", "接触部以外の識別を目的とした塗装"], c: [0, 1, 2], t: "over", e: "接触部分や性能が変化する塗装は絶対禁止です！摩擦係数等のデータが変わってしまうためです！" },
   { q: "パーツを省いてもしっかりと固定できていれば使用しても良い。", o: ["正しい", "誤り", "ジャッジに申告すれば可", "軽量化目的のみ可"], c: 1, t: "extreme", e: "本来使用すべきパーツを省くことは禁止です。" },
@@ -266,9 +324,9 @@ const RAW_QUESTIONS = [
 
   // --- ペナルティ・勝敗判定・ポイント ---
   { q: "同じバトル内で自分と相手が「同時に」2回目のシュートミスをした。この場合、両者に1ポイントが入り次のバトルへ進む。", o: ["正しい", "誤り"], c: 1, t: "extreme", e: "誤り！同時に2回目の違反が行われた場合は「2回目の行為は無効」となり、全ての選手が1回目の違反を行った状態としてやり直します！ポイントは入りません！" },
-  { q: "複数の決まり手が同バトルで成立した場合、勝敗の判断基準となるロジックはどれか？", o: ["獲得ポイントが高い決まり手を優先する", "「発生」タイミングが先の決まり手を優先する", "「成立」タイミングが先の決まり移る優先する", "常に引き分けとしてやり直す"], c: 1, t: "burst", e: "ポイントの大小ではなく、「先に発生した決まり手」で勝敗を判断します！" },
+  { q: "複数の決まり手が同バトルで成立した場合の判定として正しいものを選べ。", o: ["先に「成立」した決まり手を適用", "先に「発生」した決まり手を適用", "得点が高い決まり手を適用", "得点が低い決まり手を適用"], c: 1, t: "burst", e: "先に「発生」した決まり手にてバトルの勝ち負けを判断します。" },
   { q: "リバースが発生した場合の正しい処理を選べ。", o: ["一度入ったゾーンでのフィニッシュが確定する", "やり直しとなる", "フィニッシュの「発生」が取り消され、バトルを続行する", "バトルを中止し、次のバトルへうつる"], c: 2, t: "burst", e: "エクストリームやオーバーゾーンに入っても、回転を維持して戻ってきた場合はリバースとなり、判定が取り消されてバトル続行となります！" },
-  { q: "3人バトルにおいて、既にスピンフィニッシュ（回転0）となっているベイAが、他のベイBに弾かれてバーストした。ベイAの負け方はどちらで判定されるか？", o: ["スピンフィニッシュ", "バーストフィニッシュ", "引き分け", "無効試合"], c: 0, t: "extreme", e: "複数の決まり手が成立した場合、「先に発生した決まり手」が採用されます。この場合は先に発生したスピンフィニッシュです！" },
+  { q: "3人バトルにおいて、既に回転速度が0となっているベイAが、他のベイBに弾かれてバーストした。ベイAの負け方はどちらで判定されるか？", o: ["スピンフィニッシュ", "バーストフィニッシュ", "引き分け", "無効試合"], c: 0, t: "extreme", e: "複数の決まり手が成立した場合、「先に発生した決まり手」が採用されます。この場合は先に発生したスピンフィニッシュです！" },
 
   // --- 3on3・チーム戦規定 ---
   { q: "チーム戦において、1人目の選手同士が「2-1」で決着し、勝者が次の相手と戦うことになった。この時、ポイントの扱いはどうなるか？", o: ["ジャッジの判断による", "失点の1ポイントだけ引き継ぐ", "ポイントは引き継がれず「0-0」からスタートする", "負けたチームが決めることができる"], c: 2, t: "burst", e: "決着がつき対戦相手が変わった場合、獲得していたポイントは一切引き継がれずリセットされます！" },
@@ -320,12 +378,12 @@ const RAW_QUESTIONS = [
   { q: "相手のシュートや構えを妨害する目的でシュートを構えた。", o: ["相手から申告が無ければ可", "禁止されている", "接触しなければ可", "ジャッジが認めれば可"], c: 1, t: "over", e: "シュートの構え等で相手の選手のシュートや構えを妨害することは禁止です。" },
   { q: "自身のシュートの癖で、シュート時に体やランチャー等が相手やスタジアムに触れてしまうことがある。", o: ["故意でなければ問題ない", "禁止されている", "お互いのシュートに影響がなければ可", "スタジアムにのみ触れるのは可"], c: 1, t: "over", e: "いかなる場合も、触れることを禁止します。" },
   { q: "シュート時に接触が発生し、危険とジャッジが判断した場合の対応として正しいものを選べ。", o: ["失格", "シュートの構えや位置の指定", "使用するランチャーやグリップの指定", "シュートミス扱い"], c: 1, t: "over", e: "ジャッジがシュートの構えや位置を指定する場合があります。" },
-  { q: "故意に相手の選手やスタジアムに触れたとジャッジが判断した場合の対応として正しいものを選べ。", o: ["注意", "シュートミス扱い", "やり直し", "失格"], c: 3, t: "over", e: "故意に触れたとジャッジが判断した場合は失格になります。" },
+  { q: "故意に相手の選手やスタジアムに触れたとジャッジが判断した場合。", o: ["注意", "シュートミス扱い", "やり直し", "失格"], c: 3, t: "over", e: "故意に触れたとジャッジが判断した場合は失格になります。" },
   { q: "シュート時の正しい掛け声を選べ。", o: ["レディセット、ゴーシュート", "スリー、ツー、ワン、ゴーシュート", "ゴー、シュート", "ワン、ツー、スリー、ゴーシュート"], c: 1, t: "spin", e: "「スリー、ツー、ワン、ゴーシュート」の掛け声でシュートしてください。" },
 
   // --- 10. シュート違反 ---
   { q: "シュート時にベイが通過すべき場所として正しいものを選べ。", o: ["シュートエリア", "バトルゾーン", "シュートポジション", "エクストリームライン"], c: 0, t: "spin", e: "シュートはシュートエリアを通過するようにシュートしてください。" },
-  { q: "シュート後にバウンドしないよう、ベイをスタジアムに接地させたままシュートした。", o: ["問題ない", "禁止されている", "相手の妨害をしていなければ可", "インフィニティスタジアムのみ可"], c: 1, t: "over", e: "接地させたままシュートしないでください。故意の場合は失格になります。" },
+  { q: "シュート後にバウンドしないよう、ベイをスタジアムに接地させたままシュートした。", o: ["問題ない", "禁止されている", "相手の妨害をしていなければ可", "インフィニティスタジアムのみ可"], c: 1, t: "extreme", e: "接地させたままシュートしないでください。故意の場合は失格になります。" },
   { q: "シュート時にベイがランチャーから外れずシュートできなかった場合の判定として正しいものを選べ。", o: ["スピンフィニッシュ", "やり直し", "シュートミス", "失格"], c: 2, t: "over", e: "ランチャーから外れずシュートできない場合はシュートミスとなります。" },
   { q: "掛け声を言い始めた後にベイが落ちてしまった場合の判定として正しいものを選べ。", o: ["シュートミス", "フライング", "スピンフィニッシュ", "「シュート」の掛け声の前であればやり直し"], c: 0, t: "over", e: "掛け声を言い始めた後に落ちた場合はシュートミスとなります。" },
   { q: "シュート時にスタジアム外やカバーに接触した場合の判定として正しいものを選べ。", o: ["やり直し", "シュートミス", "失格", "オーバーフィニッシュ"], c: 1, t: "over", e: "シュートエリア外へのシュートはシュートミスとなります。" },
@@ -335,7 +393,7 @@ const RAW_QUESTIONS = [
 
   // --- 11. バトル中の振る舞い ---
   { q: "バトルに関して疑問があった場合、ジャッジに伝えるタイミングとして正しいものを選べ。", o: ["次のバトル開始後", "その場ですぐに", "試合終了後", "観客を通して"], c: 1, t: "burst", e: "その場で選手がジャッジに伝えてください。次のバトル開始後は認められません。" },
-  { q: "危険と思われるベイの使用、シュート方法等、公平な試合を妨げる出来事が発生したとジャッジが判断した場合の対応として正しいものを選べ。", o: ["失格", "シュートミス", "バトルを中止しやり直す", "そのまま続行"], c: 2, t: "over", e: "バトルを中止しやり直します。" },
+  { q: "危険と思われるベイの使用、シュート方法等、公平な試合を妨げる出来事が発生したとジャッジが判断した場合。", o: ["失格とする", "シュートミス", "バトルを中止しやり直す", "そのまま続行"], c: 2, t: "over", e: "バトルを中止しやり直します。" },
 
   // --- 12. 勝敗とポイント (基本) ---
   { q: "ベイのパーツの一部の固定が外れたが、分離せずに回っている状態の時の判定として正しいものを選べ。", o: ["バーストフィニッシュ", "そのまま続行", "バトルを中止しやり直す", "ジャッジ判断"], c: 1, t: "extreme", e: "分離していなければバーストフィニッシュは成立しません。" },
@@ -344,7 +402,6 @@ const RAW_QUESTIONS = [
   // --- 13. 勝敗とポイント (特殊・判定) ---
   { q: "バレットグリフォンから分離したバレットの勝敗判定上の扱いについて、正しいものを選べ。", o: ["含まれる", "含まれない", "オーバーフィニッシュのみ適用", "エクストリームフィニッシュのみ適用"], c: 1, t: "burst", e: "バレットは判定には含まれず、本体で勝敗を判定します。" },
   { q: "同時に複数の決まり手が発生したとジャッジが判断した場合の対応として正しいものを選べ。", o: ["ポイントが高い決まり手を適用", "ポイントが低い決まり手を適用", "引き分けとし、同じベイを使って再バトル", "先に「成立」した決まり手を適用"], c: 2, t: "burst", e: "引き分けとし再バトルとなります。" },
-  { q: "複数の決まり手が同バトルで成立した場合の判定として正しいものを選べ。", o: ["先に「成立」した決まり手を適用", "先に「発生」した決まり手を適用", "得点が高い決まり手を適用", "得点が低い決まり手を適用"], c: 1, t: "burst", e: "先に「発生」した決まり手にてバトルの勝ち負けを判断します。" },
   { q: "ベイ全体がエクストリームゾーンに入った「瞬間」が発生タイミングとなるものを選べ。", o: ["「瞬間」は発生タイミングとして扱わない", "エクストリームフィニッシュ", "リバース", "バースト"], c: 1, t: "burst", e: "エクストリームフィニッシュの発生タイミングとなります。" },
   { q: "ベイの本来の回転方向の速度が0になった「瞬間」が発生タイミングとなるものを選べ。", o: ["「瞬間」は発生タイミングとして扱わない", "オーバーフィニッシュ", "スピンフィニッシュ", "ドロー"], c: 2, t: "burst", e: "スピンフィニッシュの発生タイミングとなります。" },
   { q: "オーバーゾーン、エクストリームゾーンに入った、またはスタジアム外に出たベイが回転を維持したままバトルゾーンに戻ってきた場合の呼称として正しいものを選べ。", o: ["リバイバル", "リバース", "カムバック", "リカバリー"], c: 1, t: "burst", e: "リバースとなり、バトルを続行します。" },
@@ -372,10 +429,10 @@ const RAW_QUESTIONS = [
   { q: "ワイドエクストリームスタジアムを用いて2人の選手で試合をする時、1人がシュートミス、フライング、後出しを合計2回行った場合。", o: ["そもそもワイドエクストリームスタジアムを2人対戦で使用してはいけない", "相手選手に1ポイントが入り、そのバトルをやり直す", "相手選手に1ポイントが入り、次のバトルへうつる", "相手選手の勝利で試合終了"], c: 1, t: "extreme", e: "相手選手に1ポイントが入り、そのバトルをやり直します。" },
 
   // --- 16. 3on3 バトル規定 ---
-  { q: "3on3バトルでバトルさせる順番に入れ替えるタイミングで正しいものを選べ。", o: ["ベイチェック前", "ベイチェック後", "シュートポジションを決める前", "シュートポジションを決めた後"], c:0, t: "spin", e: "バトルする順番に入れてからジャッジに提出してください。" },
+  { q: "3on3バトルで、バトルさせる順番に入れ替えるタイミングは？", o: ["ベイチェック前", "ベイチェック後", "シュートポジションを決める前", "シュートポジションを決めた後"], c:0, t: "spin", e: "バトルする順番に入れてからジャッジに提出してください。" },
   { q: "試合中のジャッジの許可なしでベイの順番変更したい。", o: ["できる", "できない", "1回だけできる", "相手の許可があればできる"], c: 1, t: "over", e: "順番や組み合わせを変更することはできません。" },
-  { q: "3on3バトルで勝利するために必要な合計ポイントとして正しいものを選べ。", o: ["2ポイント", "3ポイント", "4ポイント", "5ポイント"], c: 2, t: "spin", e: "合計で4ポイント先取したブレーダーが勝利となります。" },
-  { q: "3on3バトルで引き分けになった場合の対応として正しいものを選べ。", o: ["ポイント付与はなく、次のベイに進む", "両者に1ポイント与え、次のベイに進む", "同じ番号のベイで再度バトルを行う", "両者に該当の決まり手のポイントを適用し、次のベイに進む"], c: 2, t: "burst", e: "同じ番号のベイで再バトルとなります。" },
+  { q: "3on3バトルで、勝利するために必要な合計ポイントとして正しいものを選べ。", o: ["2ポイント", "3ポイント", "4ポイント", "5ポイント"], c: 2, t: "spin", e: "合計で4ポイント先取したブレーダーが勝利となります。" },
+  { q: "3on3バトルで、引き分けになった場合の対応として正しいものを選べ。", o: ["ポイント付与はなく、次のベイに進む", "両者に1ポイント与え、次のベイに進む", "同じ番号のベイで再度バトルを行う", "両者に該当の決まり手のポイントを適用し、次のベイに進む"], c: 2, t: "burst", e: "同じ番号のベイで再バトルとなります。" },
   { q: "3on3バトルで、3rdバトルで勝敗が決まらなかった場合の対応として正しいものを選べ。", o: ["引き分けで試合を終了する", "同じ順番のまま、1番のベイから試合を続行する", "再度バトルさせる順番を組み直して試合を続行", "1ベイバトルで勝敗を決める"], c: 2, t: "burst", e: "再度バトルさせる順番を組み直して試合を続行します。" },
   { q: "3on3バトルで、3個のベイを用意できない場合の対応として正しいものを選べ。", o: ["ジャッジより不足している分の貸出ベイを受け取り、自身のベイを含めて3on3バトルを行う", "ジャッジより貸出ベイを1個受け取り、貸出ベイのみで全バトルを行う", "持っているベイのみで試合を行う", "ジャッジより貸出ベイを3個受け取り、貸出ベイのみで3on3バトルを行う"], c: 1, t: "extreme", e: "貸出ベイを1個受け取り、貸出ベイのみで全てのバトルを行います。" },
 
@@ -423,6 +480,32 @@ let selectedOpts = [];
 let categoryStats = {};
 let wrongQuestions = []; // 間違えた問題の元データを記録
 let isRetryMode = false; // 間違い問題再挑戦モードかどうか
+let selectedCount = 100; // トップ画面で選択された出題数
+let selectedGenres = new Set(['spin', 'over', 'burst', 'extreme']); // トップ画面で選択された出題ジャンル
+
+// 問題数選択ボタン
+document.querySelectorAll('#countGroup .toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#countGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedCount = parseInt(btn.dataset.count, 10);
+  });
+});
+
+// 出題ジャンル選択ボタン（複数選択・最低1つは選択状態を維持）
+document.querySelectorAll('#genreGroup .toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const g = btn.dataset.genre;
+    if(selectedGenres.has(g)){
+      if(selectedGenres.size === 1) return; // 全解除は不可
+      selectedGenres.delete(g);
+      btn.classList.remove('active');
+    } else {
+      selectedGenres.add(g);
+      btn.classList.add('active');
+    }
+  });
+});
 
 function shuffle(arr){
   const a = arr.slice();
@@ -436,8 +519,11 @@ function shuffle(arr){
 function initQuiz(){
   isRetryMode = false;
   wrongQuestions = [];
-  // 100問に切り詰める
-  order = shuffle(RAW_QUESTIONS).slice(0, 100).map((q, idx) => {
+  // 選択されたジャンルの問題のみを対象にする
+  const pool = RAW_QUESTIONS.filter(q => selectedGenres.has(q.t));
+  const count = Math.min(selectedCount, pool.length);
+  // 選択された出題数に切り詰める
+  order = shuffle(pool).slice(0, count).map((q, idx) => {
     // 選択肢をシャッフルし、正解インデックスを追従
     const opts = q.o.map((text, i) => ({ text, origIdx: i }));
     const shuffledOpts = shuffle(opts);
@@ -658,6 +744,35 @@ function buildResultFlavor(pct, stats){
   return { rank, color, flavor: baseFlavor + extra };
 }
 
+// ジャンル別正答率ゲージを描画（正解数ではなく正答率で表示。出題されたジャンルのみ表示）
+const CATEGORY_GAUGE_COLOR = {
+  spin: 'var(--cyan)', over: 'var(--orange)', burst: 'var(--gold)', extreme: 'var(--pink)'
+};
+function renderCategoryGauges(stats){
+  const rowsWrap = document.getElementById('categoryGaugeRows');
+  const order = ['spin', 'over', 'burst', 'extreme'];
+  const targets = [];
+  let html = '';
+  order.forEach(k => {
+    const s = stats[k];
+    if(!s || s.total === 0) return; // 出題されなかったジャンルは表示しない
+    const pct = Math.round((s.correct / s.total) * 100);
+    targets.push(pct);
+    html += `<div class="gauge-row">
+      <div class="gauge-label"><span>${CATEGORY_INFO[k].label}</span><span class="gauge-pct mono">${pct}%（${s.correct}/${s.total}）</span></div>
+      <div class="gauge-track"><div class="gauge-fill" style="background:${CATEGORY_GAUGE_COLOR[k]};"></div></div>
+    </div>`;
+  });
+  rowsWrap.innerHTML = html;
+  document.getElementById('categoryGauges').style.display = targets.length > 0 ? 'block' : 'none';
+
+  // アニメーションでゲージを伸ばす
+  const fills = rowsWrap.querySelectorAll('.gauge-fill');
+  setTimeout(() => {
+    fills.forEach((el, i) => { el.style.width = targets[i] + '%'; });
+  }, 50);
+}
+
 function showResult(){
   // 最後の問題のtickを更新
   const ticksWrap = document.getElementById('ticks');
@@ -684,6 +799,8 @@ function showResult(){
   rankEl.textContent = result.rank; rankEl.style.color = result.color;
   document.getElementById('resultFlavor').textContent = result.flavor;
   ring.setAttribute('stroke', result.color);
+
+  renderCategoryGauges(categoryStats);
 
   // 間違い問題再挑戦ボタンの表示制御（全問正解以外 & 間違い問題が存在する場合）
   const retryWrongBtn = document.getElementById('retryWrongBtn');
