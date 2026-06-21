@@ -78,7 +78,7 @@
     font-family:'Noto Sans JP', sans-serif; font-weight:500; font-size:13px;
     padding:9px 14px; border-radius:3px; cursor:pointer; transition:all .15s ease;
   }
-  .toggle-btn:hover{ border-color:var(--cyan); color:var(--chrome); }
+  /* .toggle-btn:hover{ border-color:var(--cyan); color:var(--chrome); }*/
   .toggle-btn.active{ background:#102733; border-color:var(--cyan); color:var(--cyan); }
   .toggle-btn.genre-btn.active{ background:#4A2E14; border-color:var(--orange); color:var(--orange); }
   .toggle-btn:disabled{ opacity:.4; cursor:not-allowed; }
@@ -116,7 +116,7 @@
     font-family:'Noto Sans JP', sans-serif; font-size:14px; padding:13px 14px;
     cursor:pointer; border-radius:3px; transition:all .15s ease;
   }
-  .opt:hover:not(.locked){ border-color:var(--cyan); }
+  /*.opt:hover:not(.locked){ border-color:var(--cyan); }*/
   .opt.selected{ border-color:var(--orange); background:#2A1F18; }
   .opt.selected .opt-tag{ background:var(--orange); color:#0A0E16; border-color:var(--orange); }
   
@@ -182,13 +182,21 @@
   .gauge-fill{ height:100%; width:0%; border-radius:4px; transition:width 1s ease; }
 
   .hidden{display:none !important;}
+
+  .tap-highlight {
+    border-color: var(--cyan) !important;
+    transition: none !important; /* タップした瞬間は即座にハイライトさせる！ */
+  }
+  .tap-fade {
+    transition: border-color 1s ease-out !important; /* 1秒かけて本来の状態へ滑らかに戻す！ */
+  }
 </style>
 </head>
 <body>
 <div class="app-shell">
 
   <div class="hero">
-    <div class="eyebrow mono">version 3.0</div>
+    <div class="eyebrow mono">version 3.1</div>
     <h1>ベイブレード<span>X</span> 検定</h1>
     <p>当問題はレギュレーション第12版を元に生成されています。</p>
     <p></p>
@@ -270,6 +278,25 @@
 </div>
 
 <script>
+function applyTapEffect(element) {
+  if (element.classList.contains('locked')) return; // 回答済みのロック状態なら弾く
+
+  // 初期化：進行中のフェードがあればリセット
+  element.classList.remove('tap-fade');
+  element.classList.add('tap-highlight');
+
+  // 強制リフロー：ブラウザに変更を即座に認識させる（データ処理の基本！）
+  void element.offsetWidth;
+
+  // ハイライトを外し、1秒間のフェードアウト状態へ移行
+  element.classList.remove('tap-highlight');
+  element.classList.add('tap-fade');
+
+  // 1秒後（1000ms）にフェードアウトクラスをクリーンアップ
+  setTimeout(() => {
+    element.classList.remove('tap-fade');
+  }, 1000);
+}  
 const RAW_QUESTIONS = [
   // --- 複数選択・引っかけ特化 ---
   { q: "3on3のルール上、起きてはならない事象を下記から全て選べ。", o: ["同じベイを2回連続で使った。", "4thバトルに移行するとき、ベイの順番を入れ替えた。", "一方の選手がシュートミスを2回したので相手に1ポイント与え、次のベイに進んだ。", "4thバトルに移行するとき、ベイの組み合わせを変更した。"], c: [2, 3], t: "extreme", e: "4thバトル移行時にベイの順番の入替が可能なため、3rd,4thで同じベイを使う場合があります。同じパーツ(ワルキューレ,エンペラーを含む)の複数使用不可。ペナルティ時は「やり直し」であり次のベイには進みません。" },
@@ -486,6 +513,7 @@ let selectedGenres = new Set(['spin', 'over', 'burst', 'extreme']); // トップ
 // 問題数選択ボタン
 document.querySelectorAll('#countGroup .toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    applyTapEffect(btn);
     document.querySelectorAll('#countGroup .toggle-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedCount = parseInt(btn.dataset.count, 10);
@@ -495,6 +523,7 @@ document.querySelectorAll('#countGroup .toggle-btn').forEach(btn => {
 // 出題ジャンル選択ボタン（複数選択・最低1つは選択状態を維持）
 document.querySelectorAll('#genreGroup .toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    applyTapEffect(btn);
     const g = btn.dataset.genre;
     if(selectedGenres.has(g)){
       if(selectedGenres.size === 1) return; // 全解除は不可
@@ -614,6 +643,7 @@ function renderQuestion(){
 
 function handleSelect(pos, btnEl){
   if(answered) return;
+  applyTapEffect(btnEl);
   const q = order[current];
 
   if(q.isMulti){
